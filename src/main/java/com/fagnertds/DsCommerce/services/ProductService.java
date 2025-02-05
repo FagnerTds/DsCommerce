@@ -3,6 +3,9 @@ package com.fagnertds.DsCommerce.services;
 import com.fagnertds.DsCommerce.dto.ProductDTO;
 import com.fagnertds.DsCommerce.entities.Product;
 import com.fagnertds.DsCommerce.repositories.ProductRepository;
+import com.fagnertds.DsCommerce.services.exceptions.ResourceNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
+import org.hibernate.EntityFilterException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +23,7 @@ public class ProductService {
     @Transactional (readOnly = true)
     public ProductDTO findById(Long id) {
         Optional<Product> result = repository.findById(id);
-        Product product = result.get();
+        Product product = result.orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado"));
         ProductDTO dto = new ProductDTO(product);
         return dto;
     }
@@ -41,10 +44,15 @@ public class ProductService {
 
     @Transactional
     public ProductDTO update(Long id, ProductDTO dto) {
-        Product product = repository.getReferenceById(id);
-        copyDtoToEntity (dto, product);
-        product = repository.save(product);
-        return new ProductDTO(product);
+
+        try {
+            Product product = repository.getReferenceById(id);
+            copyDtoToEntity(dto, product);
+            product = repository.save(product);
+            return new ProductDTO(product);
+        } catch (EntityNotFoundException e) {
+            throw new ResourceNotFoundException("Recurso não encontrado");
+        }
     }
 
     @Transactional

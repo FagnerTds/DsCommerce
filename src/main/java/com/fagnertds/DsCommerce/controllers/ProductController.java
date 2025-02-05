@@ -1,7 +1,9 @@
 package com.fagnertds.DsCommerce.controllers;
 
+import com.fagnertds.DsCommerce.dto.CustomError;
 import com.fagnertds.DsCommerce.dto.ProductDTO;
 import com.fagnertds.DsCommerce.services.ProductService;
+import com.fagnertds.DsCommerce.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.List;
 
 @RestController
