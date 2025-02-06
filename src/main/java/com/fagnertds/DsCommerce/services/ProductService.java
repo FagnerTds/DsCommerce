@@ -3,13 +3,16 @@ package com.fagnertds.DsCommerce.services;
 import com.fagnertds.DsCommerce.dto.ProductDTO;
 import com.fagnertds.DsCommerce.entities.Product;
 import com.fagnertds.DsCommerce.repositories.ProductRepository;
+import com.fagnertds.DsCommerce.services.exceptions.DatabaseException;
 import com.fagnertds.DsCommerce.services.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.hibernate.EntityFilterException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -55,9 +58,17 @@ public class ProductService {
         }
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.SUPPORTS)
     public void delete(Long id) {
-        repository.deleteById(id);
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Recurso não encontrado");
+        }
+        try {
+            repository.deleteById(id);
+        }
+        catch (DataIntegrityViolationException e) {
+            throw new DatabaseException("Falha de integridade referencial");
+        }
     }
 
 
